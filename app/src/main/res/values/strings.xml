@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">RetrofitWhithJetpackCompose</string>
+    <string name="species_and_status">%1s - %2s</string>
+</resources>
