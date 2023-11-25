@@ -8,13 +8,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import com.example.retrofitwhithjetpackcompose.presentetion.screens.characters.MangaList
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.retrofitwhithjetpackcompose.data.models.Result
+import com.example.retrofitwhithjetpackcompose.presentetion.UiState
+import com.example.retrofitwhithjetpackcompose.presentetion.screens.characters.CharactersList
 import com.example.retrofitwhithjetpackcompose.presentetion.screens.characters.ProgressBar
 import com.example.retrofitwhithjetpackcompose.ui.theme.DarkGray
 import com.example.retrofitwhithjetpackcompose.ui.theme.RetrofitWhithJetpackComposeTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val characterViewModel = CharacterViewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -23,11 +29,21 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = DarkGray
                 ) {
-                    if (characterViewModel.showProgressBar.collectAsState().value) {
-                        Log.e("TAG", "onCreate: progressBar", )
-                        ProgressBar()
-                    } else {
-                        MangaList(viewModel = CharacterViewModel())
+                    val characterViewModel: CharacterViewModel = hiltViewModel()
+                    val characterDataState = characterViewModel.characterData.collectAsState()
+
+                    when (characterDataState.value) {
+                        is UiState.Error -> {
+                            Log.e("TAG", "onCreate: Error")
+                        }
+
+                        is UiState.IsLoading -> {
+                            ProgressBar(modifier = Modifier.fillMaxSize())
+                        }
+
+                        is UiState.Success -> {
+                            CharactersList((characterDataState.value as UiState.Success<List<Result>>).result)
+                        }
                     }
                 }
             }

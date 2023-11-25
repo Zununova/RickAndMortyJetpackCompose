@@ -6,9 +6,10 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Inject
 
 
-class RetrofitClient {
+class RetrofitClient @Inject constructor() {
 
     private val okhttpClient = OkHttpClient().newBuilder()
         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
@@ -26,5 +27,4 @@ class RetrofitClient {
     fun provideCharacterApiService(): CharacterApiService {
         return retrofitClient.create(CharacterApiService::class.java)
     }
-
 }

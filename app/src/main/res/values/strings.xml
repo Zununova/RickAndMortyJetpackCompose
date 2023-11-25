@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">RetrofitWhithJetpackCompose</string>
     <string name="species_and_status">%1s - %2s</string>
+    <string name="Title">"Rick and Morty persons: "</string>
+    <string name="image_discription">Image with %1$s</string>
+    <string name="first_seen_in">"First seen in: "</string>
+    <string name="last_know_location">Last know location:</string>
 </resources>
