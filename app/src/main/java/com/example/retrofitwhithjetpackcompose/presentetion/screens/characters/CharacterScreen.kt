@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -15,9 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,23 +24,23 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.retrofitwhithjetpackcompose.R
-import com.example.retrofitwhithjetpackcompose.presentetion.activity.CharacterViewModel
-import com.example.retrofitwhithjetpackcompose.ui.theme.DarkGray
+import com.example.retrofitwhithjetpackcompose.data.models.Result
 import com.example.retrofitwhithjetpackcompose.ui.theme.Gray
 import com.example.retrofitwhithjetpackcompose.ui.theme.LightGray
+import com.example.retrofitwhithjetpackcompose.ui.theme.TransparentBlack
 
 @Composable
-fun MangaList(viewModel: CharacterViewModel) {
-    val stateData = viewModel.characterData.collectAsState()
+fun CharactersList(characterList: List<Result>) {
 
     Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(text = "Rick and Morty persons: ", color = Color.White)
+        Text(text = stringResource(R.string.Title), color = Color.White)
         LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)) {
             item {
                 LazyRow(
@@ -52,7 +50,7 @@ fun MangaList(viewModel: CharacterViewModel) {
                     )
                 ) {
 
-                    items(stateData.value) { characterModel ->
+                    items(characterList) { characterModel ->
                         FirstCharacterCard(
                             imageVector = characterModel.image,
                             mangaTitle = characterModel.name,
@@ -62,14 +60,14 @@ fun MangaList(viewModel: CharacterViewModel) {
                     }
                 }
             }
-            items(stateData.value) { characterModel ->
+            items(characterList) { characterModel ->
                 SecondCharacterCard(
                     imageVector = characterModel.image,
                     personName = characterModel.name,
                     status = characterModel.status,
                     species = characterModel.species,
                     location = characterModel.location.name,
-                    orign = characterModel.origin.name
+                    origin = characterModel.origin.name
                 )
 
             }
@@ -79,16 +77,19 @@ fun MangaList(viewModel: CharacterViewModel) {
 
 @Composable
 fun ProgressBar(modifier: Modifier = Modifier) {
-    CircularProgressIndicator(
-        modifier = modifier.size(100.dp).padding(100.dp),
-        strokeWidth = 10.dp,
-        color = Color.White
-    )
+    Box(modifier = modifier) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(100.dp)
+                .align(Alignment.Center),
+            strokeWidth = 10.dp,
+            color = Color.White
+        )
+    }
 }
 
 @Composable
 fun FirstCharacterCard(imageVector: String, mangaTitle: String, status: String, species: String) {
-    val isLoading = remember { mutableStateOf(true) }
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(10))
@@ -99,23 +100,29 @@ fun FirstCharacterCard(imageVector: String, mangaTitle: String, status: String, 
                 .size(200.dp),
             model = ImageRequest.Builder(LocalContext.current).data(imageVector).build(),
             placeholder = painterResource(id = R.drawable.img),
-            contentDescription = "Manga poster",
+            contentDescription = stringResource(id = R.string.image_discription),
             contentScale = ContentScale.Crop,
         )
 
         Column(
             modifier = Modifier
-                .padding(20.dp)
                 .align(Alignment.BottomStart)
+                .background(TransparentBlack)
+                .padding(horizontal = 20.dp, vertical = 5.dp)
         ) {
             Text(
+                modifier = Modifier.width(160.dp),
                 text = mangaTitle,
                 fontSize = 16.sp,
-                color = DarkGray,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
+                modifier = Modifier.width(160.dp),
                 text = stringResource(id = R.string.species_and_status, status, species),
-                color = Gray
+                color = Color.LightGray,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
@@ -129,7 +136,7 @@ fun SecondCharacterCard(
     status: String,
     species: String,
     location: String,
-    orign: String
+    origin: String
 ) {
     Row(
         modifier = modifier
@@ -140,7 +147,7 @@ fun SecondCharacterCard(
         AsyncImage(
             modifier = Modifier.size(120.dp),
             model = ImageRequest.Builder(LocalContext.current).data(imageVector).build(),
-            contentDescription = "Image with $personName",
+            contentDescription = stringResource(R.string.image_discription, personName),
             placeholder = painterResource(id = R.drawable.img),
             contentScale = ContentScale.Crop
         )
@@ -159,10 +166,14 @@ fun SecondCharacterCard(
                 fontSize = 10.sp,
                 color = Color.White
             )
-            Text(text = "Last know location:", fontSize = 10.sp, color = LightGray)
+            Text(
+                text = stringResource(R.string.last_know_location),
+                fontSize = 10.sp,
+                color = LightGray
+            )
             Text(text = location, fontSize = 14.sp, color = Color.White)
-            Text(text = "First seen in: ", fontSize = 10.sp, color = LightGray)
-            Text(text = orign, fontSize = 14.sp, color = Color.White)
+            Text(text = stringResource(R.string.first_seen_in), fontSize = 10.sp, color = LightGray)
+            Text(text = origin, fontSize = 14.sp, color = Color.White)
 
 
         }
@@ -172,5 +183,5 @@ fun SecondCharacterCard(
 @Composable
 @Preview
 fun PreviewScannerManga() {
-    MangaList(viewModel = CharacterViewModel())
+    CharactersList(emptyList())
 }
