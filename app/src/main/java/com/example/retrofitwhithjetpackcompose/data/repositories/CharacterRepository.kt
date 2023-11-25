@@ -1,17 +1,20 @@
 package com.example.retrofitwhithjetpackcompose.data.repositories
 
-import com.example.retrofitwhithjetpackcompose.App
-import com.example.retrofitwhithjetpackcompose.data.models.Result
-import com.example.retrofitwhithjetpackcompose.presentetion.UiState
+import com.example.retrofitwhithjetpackcompose.data.remote.apiservice.CharacterApiService
 import kotlinx.coroutines.flow.flow
+import java.net.ConnectException
+import javax.inject.Inject
+import javax.security.auth.login.LoginException
 
-class CharacterRepository {
+class CharacterRepository @Inject constructor(private val apiService: CharacterApiService) {
 
-    fun fetchManga() = flow<UiState<List<Result>>> {
+    fun fetchManga(onError: (errorMessage: String) -> Unit) = flow{
         try {
-            emit(UiState.Success(App.provideCharacterApiService().fetchCharacters().results))
+            emit(apiService.fetchCharacters().results)
         } catch (exception: Exception) {
-            emit(UiState.Error(exception.message.toString()))
+            onError(exception.message.toString())
+        } catch (exception: LoginException) {
+            onError(exception.message.toString())
         }
     }
 }

@@ -5,37 +5,26 @@ import androidx.lifecycle.viewModelScope
 import com.example.retrofitwhithjetpackcompose.data.models.Result
 import com.example.retrofitwhithjetpackcompose.data.repositories.CharacterRepository
 import com.example.retrofitwhithjetpackcompose.presentetion.UiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CharacterViewModel : ViewModel() {
+@HiltViewModel
+class CharacterViewModel @Inject constructor(private val characterRepository: CharacterRepository) : ViewModel() {
 
-    private var _characterData = MutableStateFlow<List<Result>>(emptyList())
+    private var _characterData = MutableStateFlow<UiState<List<Result>>>(UiState.IsLoading())
     val characterData = _characterData.asStateFlow()
-    private val characterRepository = CharacterRepository()
-    private var _showProgressBar = MutableStateFlow<Boolean>(true)
-    val showProgressBar = _showProgressBar.asStateFlow()
 
     init {
-        fetchManga()
+        fetchCharacters()
     }
 
-    private fun fetchManga() {
+    private fun fetchCharacters() {
         viewModelScope.launch {
-            characterRepository.fetchManga().collect {
-                when (it) {
-                    is UiState.Error -> {
-                        _showProgressBar.value = false
-                    }
-                    is UiState.IsLoading -> {
-                        _showProgressBar.value = true
-                    }
-                    is UiState.Success -> {
-                        _showProgressBar.value = false
-                        _characterData.value = it.result
-                    }
-                }
+            characterRepository.fetchManga {  }.collect {
+                _characterData.value = UiState.Success(it)
             }
         }
     }
